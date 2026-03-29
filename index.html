@@ -45,31 +45,40 @@
 
             if (!prompt) return alert("Harap isi prompt!");
 
-            // Tampilkan Loading
-            btn.disabled = true;
-            loading.classList.remove('hidden');
-            result.classList.add('hidden');
+                    const HF_TOKEN = "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";
 
-            try {
-                // Catatan: Anda perlu mengganti URL & API Key dengan layanan asli (misal: Replicate/Fal.ai)
-                // Ini adalah contoh struktur pemanggilan API
-                console.log("Mengirim prompt:", prompt);
-                
-                // Simulasi delay proses AI
-                setTimeout(() => {
-                    loading.classList.add('hidden');
-                    result.classList.remove('hidden');
-                    btn.disabled = false;
-                    
-                    // Contoh hasil (menggunakan video placeholder)
-                    document.getElementById('videoPlayer').src = "https://www.w3schools.com/html/mov_bbb.mp4";
-                }, 5000);
+        btn.disabled = true;
+        loading.classList.remove('hidden');
+        result.classList.add('hidden');
 
-            } catch (error) {
-                alert("Terjadi kesalahan teknis.");
-                btn.disabled = false;
-                loading.classList.add('hidden');
-            }
+        try {
+            const response = await fetch(
+                "https://api-inference.huggingface.co/models/stabilityai/stable-video-diffusion-img2vid-xt",
+                {
+                    headers: { Authorization: `Bearer ${HF_TOKEN}` },
+                    method: "POST",
+                    body: JSON.stringify({ inputs: prompt }),
+                }
+            );
+
+            if (!response.ok) throw new Error("Gagal memproses video. Model mungkin sedang bersiap.");
+
+            const blob = await response.blob();
+            const videoUrl = URL.createObjectURL(blob);
+            
+            document.getElementById('videoPlayer').src = videoUrl;
+            document.getElementById('downloadBtn').href = videoUrl;
+            
+            loading.classList.add('hidden');
+            result.classList.remove('hidden');
+        } catch (error) {
+            alert("Pesan: " + error.message);
+        } finally {
+            btn.disabled = false;
+            loading.classList.add('hidden');
+        }
+    }
+
         }
     </script>
 </body>
